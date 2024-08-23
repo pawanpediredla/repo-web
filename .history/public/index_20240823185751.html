@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository Structure Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        #app {
+            margin: 20px;
+        }
+        .directory {
+            margin-left: 20px;
+        }
+        .file {
+            color: #555;
+        }
+        .tree {
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Repository Structure Viewer</h1>
+        <input type="text" id="repoUrl" placeholder="Enter repository URL">
+        <button onclick="fetchStructure()">Get Structure</button>
+        <pre id="structure" class="tree"></pre>
+    </div>
+    <script>
+        async function fetchStructure() {
+            const repoUrl = document.getElementById('repoUrl').value;
+            const response = await fetch(`/structure?url=${encodeURIComponent(repoUrl)}`);
+            const data = await response.json();
+            const structureDiv = document.getElementById('structure');
+            structureDiv.textContent = formatStructure(data, 0);
+        }
+
+        function formatStructure(nodes, depth) {
+            return nodes.map(node => {
+                const prefix = ' '.repeat(depth * 4);
+                if (node.type === 'directory') {
+                    return `${prefix}├── ${node.name}\n${formatStructure(node.children, depth + 1)}`;
+                } else {
+                    return `${prefix}├── ${node.name}`;
+                }
+            }).join('\n');
+        }
+    </script>
+</body>
+</html>

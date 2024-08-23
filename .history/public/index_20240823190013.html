@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository Structure Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        #app {
+            margin: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        li {
+            margin: 2px 0;
+        }
+        .directory {
+            font-weight: bold;
+        }
+        .file {
+            color: #555;
+        }
+        .loading {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Repository Structure Viewer</h1>
+        <input type="text" id="repoUrl" placeholder="Enter repository URL">
+        <button onclick="fetchStructure()">Get Structure</button>
+        <div id="structure" class="loading">Loading...</div>
+    </div>
+    <script>
+        async function fetchStructure() {
+            const repoUrl = document.getElementById('repoUrl').value;
+            const response = await fetch(`/structure?url=${encodeURIComponent(repoUrl)}`);
+            const data = await response.json();
+            const structureDiv = document.getElementById('structure');
+            structureDiv.innerHTML = '';  // Clear previous content
+            const createTree = (nodes) => {
+                const ul = document.createElement('ul');
+                nodes.forEach(node => {
+                    const li = document.createElement('li');
+                    li.textContent = node.name;
+                    if (node.type === 'directory') {
+                        li.className = 'directory';
+                        li.appendChild(createTree(node.children));
+                    } else {
+                        li.className = 'file';
+                    }
+                    ul.appendChild(li);
+                });
+                return ul;
+            };
+            structureDiv.appendChild(createTree(data));
+            structureDiv.classList.remove('loading');
+        }
+    </script>
+</body>
+</html>

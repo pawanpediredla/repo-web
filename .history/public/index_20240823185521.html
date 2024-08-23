@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository Structure Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        #app {
+            margin: 20px;
+        }
+        .directory {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Repository Structure Viewer</h1>
+        <input type="text" id="repoUrl" placeholder="Enter repository URL">
+        <button onclick="fetchStructure()">Get Structure</button>
+        <div id="structure"></div>
+    </div>
+    <script>
+        async function fetchStructure() {
+            const repoUrl = document.getElementById('repoUrl').value;
+            const response = await fetch(`/structure?url=${encodeURIComponent(repoUrl)}`);
+            const data = await response.json();
+            const structureDiv = document.getElementById('structure');
+            structureDiv.innerHTML = '';
+            const createTree = (node, parentElement) => {
+                const element = document.createElement('div');
+                element.textContent = node.name;
+                element.className = node.type;
+                parentElement.appendChild(element);
+                if (node.type === 'directory' && node.children) {
+                    const directoryDiv = document.createElement('div');
+                    directoryDiv.className = 'directory';
+                    parentElement.appendChild(directoryDiv);
+                    node.children.forEach(child => createTree(child, directoryDiv));
+                }
+            };
+            data.forEach(node => createTree(node, structureDiv));
+        }
+    </script>
+</body>
+</html>
